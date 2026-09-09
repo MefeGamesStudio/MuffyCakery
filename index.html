@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MuffyCakery — Cozy Bakery Merge Puzzle</title>
+<meta name="description" content="MuffyCakery is a cozy merge puzzle game starring Muffy the chef kitten. Whisk, match and bake your way through hundreds of sweet levels. Coming soon to iOS and Android.">
+
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream: #FFF6EC;
+    --cream-2: #FCE9D3;
+    --peach: #FBD3AC;
+    --peach-deep: #F7A660;
+    --pink: #FF97AC;
+    --pink-dark: #EA5F79;
+    --pink-pale: #FFE1E8;
+    --brown: #6B4226;
+    --brown-soft: #8C5A3C;
+    --gold: #F0B84B;
+    --teal: #5FC9BE;
+    --purple: #9B7FD4;
+    --white: #FFFFFF;
+    --shadow: 0 14px 30px rgba(139, 86, 55, 0.18);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--cream);
+    color: var(--brown);
+    font-family: 'Nunito', system-ui, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1,h2,h3{
+    font-family: 'Baloo 2', 'Nunito', sans-serif;
+    margin: 0 0 .5em 0;
+    color: var(--brown);
+  }
+
+  a{ color: inherit; }
+
+  img{ max-width: 100%; display:block; }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* decorative paw pattern */
+  .paw-bg{
+    position:absolute;
+    inset:0;
+    background-image: radial-gradient(circle, rgba(139,86,55,0.06) 3px, transparent 3.5px);
+    background-size: 42px 42px;
+    pointer-events:none;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position: sticky;
+    top:0;
+    z-index: 50;
+    background: rgba(255,246,236,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(139,86,55,0.08);
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 14px 0;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:1.3rem;
+    text-decoration:none;
+    color: var(--brown);
+  }
+  .brand img{ width:40px; height:40px; border-radius:12px; box-shadow: var(--shadow); }
+  .nav-links{
+    display:flex;
+    gap: 28px;
+    list-style:none;
+    margin:0; padding:0;
+    font-weight:700;
+  }
+  .nav-links a{
+    text-decoration:none;
+    color: var(--brown-soft);
+    padding: 6px 2px;
+    border-bottom: 2px solid transparent;
+    transition: all .2s ease;
+  }
+  .nav-links a:hover{ color: var(--pink-dark); border-color: var(--pink); }
+  .nav-cta{
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    color: var(--white) !important;
+    padding: 10px 20px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(234,95,121,0.35);
+    border-bottom: none !important;
+  }
+  .nav-cta:hover{ filter: brightness(1.06); }
+  .nav-toggle{ display:none; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding: 76px 0 60px;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-160px; right:-160px;
+    width:480px; height:480px;
+    background: radial-gradient(circle, var(--peach) 0%, rgba(251,211,172,0) 70%);
+    z-index:0;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-200px; left:-160px;
+    width:420px; height:420px;
+    background: radial-gradient(circle, var(--pink-pale) 0%, rgba(255,225,232,0) 70%);
+    z-index:0;
+  }
+  .hero-grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background: var(--pink-pale);
+    color: var(--pink-dark);
+    font-weight:800;
+    font-size: .82rem;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding: 8px 16px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .hero h1{
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+    line-height:1.12;
+  }
+  .hero h1 span{ color: var(--pink-dark); }
+  .hero p.lead{
+    font-size: 1.15rem;
+    color: var(--brown-soft);
+    max-width: 480px;
+    margin: 18px 0 30px;
+  }
+  .store-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 14px;
+  }
+  .store-badge{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background: var(--brown);
+    color: var(--white);
+    text-decoration:none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    transition: transform .2s ease, filter .2s ease;
+    position:relative;
+    cursor:default;
+  }
+  .store-badge:hover{ transform: translateY(-3px); filter: brightness(1.08); }
+  .store-badge svg{ width:26px; height:26px; flex-shrink:0; }
+  .store-badge .store-text{ display:flex; flex-direction:column; line-height:1.15; }
+  .store-badge .store-text small{ font-size:.66rem; opacity:.8; font-weight:600; letter-spacing:.03em; text-transform:uppercase; }
+  .store-badge .store-text strong{ font-family:'Baloo 2', sans-serif; font-size:1.02rem; }
+  .soon-flag{
+    position:absolute;
+    top:-10px; right:-10px;
+    background: var(--gold);
+    color: var(--brown);
+    font-size:.62rem;
+    font-weight:800;
+    padding: 4px 9px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(240,184,75,0.5);
+    white-space:nowrap;
+  }
+
+  .hero-art{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hero-art .glow{
+    position:absolute;
+    width: 360px; height:360px;
+    background: radial-gradient(circle, var(--peach-deep) 0%, rgba(247,166,96,0) 70%);
+    opacity:.55;
+    border-radius:50%;
+  }
+  .hero-art img{
+    position:relative;
+    width: min(360px, 78%);
+    filter: drop-shadow(0 24px 34px rgba(139,86,55,0.28));
+  }
+  .sticker{
+    position:absolute;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 10px 16px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size: .95rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .sticker.one{ top: 6%; left: -4%; color: var(--pink-dark); }
+  .sticker.two{ bottom: 10%; right: -6%; color: var(--teal); }
+
+  /* ---------- Sections shared ---------- */
+  section{ padding: 70px 0; position:relative; }
+  .section-head{ text-align:center; max-width: 620px; margin: 0 auto 46px; }
+  .section-head .eyebrow{ margin-left:auto; margin-right:auto; }
+  .section-head h2{ font-size: clamp(1.7rem, 3vw, 2.3rem); }
+  .section-head p{ color: var(--brown-soft); font-size:1.05rem; }
+
+  /* ---------- Features ---------- */
+  .features{ background: var(--white); border-radius: 40px; margin: 0 16px; }
+  .feature-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+  }
+  .feature-card{
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 30px 22px;
+    text-align:center;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .feature-card:hover{ transform: translateY(-6px); box-shadow: var(--shadow); }
+  .feature-icon{
+    width:64px; height:64px;
+    border-radius: 20px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 30px;
+    margin: 0 auto 18px;
+  }
+  .feature-card:nth-child(1) .feature-icon{ background: var(--pink-pale); }
+  .feature-card:nth-child(2) .feature-icon{ background: #FFEAD1; }
+  .feature-card:nth-child(3) .feature-icon{ background: #E4F5F2; }
+  .feature-card:nth-child(4) .feature-icon{ background: #EEE7FA; }
+  .feature-card h3{ font-size: 1.12rem; margin-bottom:8px; }
+  .feature-card p{ color: var(--brown-soft); font-size: .95rem; margin:0; }
+
+  /* ---------- Screenshots ---------- */
+  .screens-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 34px;
+    align-items:end;
+  }
+  .phone{
+    background: var(--brown);
+    border-radius: 34px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    transition: transform .3s ease;
+  }
+  .phone:hover{ transform: translateY(-8px) rotate(0deg); }
+  .phone:nth-child(1){ transform: rotate(-4deg); }
+  .phone:nth-child(3){ transform: rotate(4deg); }
+  .phone:nth-child(1):hover, .phone:nth-child(3):hover{ transform: translateY(-8px) rotate(0deg); }
+  .phone .screen{
+    border-radius: 24px;
+    overflow:hidden;
+    position:relative;
+  }
+  .phone .notch{
+    position:absolute;
+    top:0; left:50%; transform:translateX(-50%);
+    width: 46%; height: 18px;
+    background: var(--brown);
+    border-radius: 0 0 14px 14px;
+    z-index:2;
+  }
+
+  /* ---------- Download CTA ---------- */
+  .download{
+    background: linear-gradient(160deg, var(--pink) 0%, var(--pink-dark) 100%);
+    border-radius: 40px;
+    margin: 0 16px;
+    color: var(--white);
+    text-align:center;
+    padding: 70px 24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .download::before, .download::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .download::before{ width:260px; height:260px; top:-90px; left:-70px; }
+  .download::after{ width:220px; height:220px; bottom:-90px; right:-60px; }
+  .download h2{ color: var(--white); font-size: clamp(1.7rem, 3vw, 2.4rem); position:relative; }
+  .download p{ color: rgba(255,255,255,0.92); max-width: 480px; margin: 12px auto 30px; position:relative; }
+  .download .store-row{ justify-content:center; position:relative; }
+  .download .store-badge{ background: rgba(0,0,0,0.28); }
+
+  /* ---------- Footer ---------- */
+  footer{ padding: 40px 0 34px; }
+  .footer-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap: 18px;
+    border-top: 1px solid rgba(139,86,55,0.12);
+    padding-top: 26px;
+  }
+  .footer-brand{ display:flex; align-items:center; gap:10px; font-family:'Baloo 2', sans-serif; font-weight:700; }
+  .footer-brand img{ width:32px; height:32px; border-radius:9px; }
+  .footer-links{ display:flex; gap: 22px; list-style:none; padding:0; margin:0; font-weight:700; font-size:.92rem; }
+  .footer-links a{ text-decoration:none; color: var(--brown-soft); }
+  .footer-links a:hover{ color: var(--pink-dark); }
+  .footer-note{ color: var(--brown-soft); font-size: .85rem; width:100%; text-align:center; margin-top: 6px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px){
+    .feature-grid{ grid-template-columns: repeat(2, 1fr); }
+    .hero-grid{ grid-template-columns: 1fr; }
+    .hero-art{ order:-1; margin-bottom: 10px; }
+    .screens-grid{ grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .sticker{ display:none; }
+  }
+  @media (max-width: 640px){
+    .nav-links{ display:none; }
+    .feature-grid{ grid-template-columns: 1fr; }
+    .screens-grid{ grid-template-columns: 1fr 1fr; }
+    .screens-grid .phone:nth-child(3){ display:none; }
+    .hero{ padding-top: 44px; }
+    .footer-inner{ justify-content:center; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="brand">
+      <img src="assets/logo-512.png" alt="MuffyCakery logo">
+      MuffyCakery
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#download" class="nav-cta">Get the App</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">🐾 A cozy merge puzzle</span>
+        <h1>Whisk, match &amp; bake your way to <span>sweet</span> victory</h1>
+        <p class="lead">Join Muffy, the world's most adorable chef kitten, in her sunny bakery kitchen. Merge macarons, croissants and cakes to whip up delicious combos — one relaxing level at a time.</p>
+        <div class="store-row">
+          <!-- TODO: replace href with the live App Store listing once available -->
+          <a href="#" class="store-badge" aria-disabled="true" onclick="return false;">
+            <svg viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141 8 184.8 8 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-65.7-90-65.7-91.9zm-56.6-164.2c27-32.4 24.6-61.9 23.8-72.5-23.9 1.4-51.6 16.5-67.1 35-17.1 19.8-27.2 44.3-25 71.4 25.6 2 48.9-11 68.3-33.9z"/></svg>
+            <span class="store-text"><small>Download on the</small><strong>App Store</strong></span>
+            <span class="soon-flag">Coming soon</span>
+          </a>
+          <!-- TODO: replace href with the live Google Play listing once available -->
+          <a href="#" class="store-badge" aria-disabled="true" onclick="return false;">
+            <svg viewBox="0 0 512 512" fill="currentColor"><path d="M99.6 4.6C93 8.3 88 15 88 24v464c0 9 5 15.7 11.6 19.4l254-251.4-254-251.4zm270 213.7L153.3 100l171 96.7 45.3 21.6zm0 75.4l-45.3 21.6-171 96.7 216.3-118.3zM26 268.5 26 268.5c0 .1 0 .3 0 0zm398.6-30.3-56.4-31.9-53.8 51 53.8 51 56.5-31.9c14.9-8.4 14.9-28.9-.1-37.2z"/></svg>
+            <span class="store-text"><small>Get it on</small><strong>Google Play</strong></span>
+            <span class="soon-flag">Coming soon</span>
+          </a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="glow"></div>
+        <img src="assets/logo-512.png" alt="Muffy the chef kitten, star of MuffyCakery">
+        <div class="sticker one">✨ Merge &amp; Match</div>
+        <div class="sticker two">🧁 500+ Levels</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="wrap">
+    <div class="features">
+      <div class="wrap" style="padding: 60px 24px;">
+        <div class="section-head">
+          <span class="eyebrow">Why you'll love it</span>
+          <h2>A kitchen full of sweet surprises</h2>
+          <p>Simple to learn, impossible to put down — MuffyCakery is built for cozy, feel-good puzzle sessions.</p>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🧁</div>
+            <h3>Merge &amp; Create</h3>
+            <p>Combine matching treats to whisk up bigger, better bakery delights and chain up sweet combos.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🐱</div>
+            <h3>Meet Muffy</h3>
+            <p>A pawsitively adorable chef cat cheers you on from her cozy kitchen counter in every level.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Hundreds of Levels</h3>
+            <p>From simple sprinkles to towering cake creations, there's always a new recipe to master.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">☕</div>
+            <h3>Cozy &amp; Relaxing</h3>
+            <p>No pressure, no stress — just a warm, comforting puzzle you can pick up anytime, anywhere.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenshots">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Take a peek</span>
+        <h2>Inside Muffy's kitchen</h2>
+        <p>Real gameplay from the bakery counter — sweet, colorful and endlessly satisfying.</p>
+      </div>
+      <div class="screens-grid">
+        <div class="phone">
+          <div class="screen"><div class="notch"></div><img src="assets/screenshot-1.jpg" alt="MuffyCakery gameplay screenshot showing an early level board"></div>
+        </div>
+        <div class="phone">
+          <div class="screen"><div class="notch"></div><img src="assets/screenshot-2.jpg" alt="MuffyCakery gameplay screenshot mid-level with merged treats"></div>
+        </div>
+        <div class="phone">
+          <div class="screen"><div class="notch"></div><img src="assets/screenshot-3.jpg" alt="MuffyCakery gameplay screenshot with a full board of treats"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" class="wrap">
+    <div class="download">
+      <h2>Get MuffyCakery</h2>
+      <p>We're putting the finishing touches in the oven! MuffyCakery is coming soon to iOS and Android — check back shortly for the download links.</p>
+      <div class="store-row">
+        <a href="#" class="store-badge" aria-disabled="true" onclick="return false;">
+          <svg viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141 8 184.8 8 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-65.7-90-65.7-91.9zm-56.6-164.2c27-32.4 24.6-61.9 23.8-72.5-23.9 1.4-51.6 16.5-67.1 35-17.1 19.8-27.2 44.3-25 71.4 25.6 2 48.9-11 68.3-33.9z"/></svg>
+          <span class="store-text"><small>Download on the</small><strong>App Store</strong></span>
+          <span class="soon-flag">Coming soon</span>
+        </a>
+        <a href="#" class="store-badge" aria-disabled="true" onclick="return false;">
+          <svg viewBox="0 0 512 512" fill="currentColor"><path d="M99.6 4.6C93 8.3 88 15 88 24v464c0 9 5 15.7 11.6 19.4l254-251.4-254-251.4zm270 213.7L153.3 100l171 96.7 45.3 21.6zm0 75.4l-45.3 21.6-171 96.7 216.3-118.3zM26 268.5 26 268.5c0 .1 0 .3 0 0zm398.6-30.3-56.4-31.9-53.8 51 53.8 51 56.5-31.9c14.9-8.4 14.9-28.9-.1-37.2z"/></svg>
+          <span class="store-text"><small>Get it on</small><strong>Google Play</strong></span>
+          <span class="soon-flag">Coming soon</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="wrap" style="padding-top:10px;">
+    <div class="section-head">
+      <span class="eyebrow">Good to know</span>
+      <h2>Quick questions</h2>
+    </div>
+    <div class="feature-grid" style="grid-template-columns: repeat(2,1fr);">
+      <div class="feature-card" style="text-align:left;">
+        <h3>Is MuffyCakery free to play?</h3>
+        <p>Yes — MuffyCakery will be free to download, with optional extras for players who want them.</p>
+      </div>
+      <div class="feature-card" style="text-align:left;">
+        <h3>Which platforms will it launch on?</h3>
+        <p>MuffyCakery is launching on both iOS and Android. Store links will appear on this page as soon as they're live.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <a href="#top" class="footer-brand"><img src="assets/logo-512.png" alt="MuffyCakery logo"> MuffyCakery</a>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="https://docs.google.com/document/d/1xSzM9c2sBQnaTHqRx5H_LZ0UEdf9KehvxCUa69YQrJE/edit?tab=t.0" target="_blank" rel="noopener">Privacy Policy</a></li>
+    </ul>
+    <div class="footer-note">© 2026 Mefe Games Studio. All rights reserved. Made with 🧡 for treat-merging fans everywhere.</div>
+  </div>
+</footer>
+
+</body>
+</html>
